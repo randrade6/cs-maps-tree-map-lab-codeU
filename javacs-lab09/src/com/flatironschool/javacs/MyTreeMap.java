@@ -72,7 +72,18 @@ public class MyTreeMap<K, V> implements Map<K, V> {
 		Comparable<? super K> k = (Comparable<? super K>) target;
 		
 		// the actual search
-        // TODO: Fill this in.
+        Node currNode = root;
+		int comp;
+		while(currNode != null) {
+			comp = k.compareTo(currNode.key);
+			if (comp > 0) {
+				currNode = currNode.right;
+			} else if (comp < 0) {
+				currNode = currNode.left;
+			} else {
+				return currNode;
+			}
+		}
         return null;
 	}
 
@@ -92,6 +103,23 @@ public class MyTreeMap<K, V> implements Map<K, V> {
 
 	@Override
 	public boolean containsValue(Object target) {
+		if (root == null) {
+			return false;
+		}
+		Deque<Node> stack = new LinkedList<Node>();
+		stack.push(root);
+		while (!stack.isEmpty()) {
+			Node node = stack.pop();
+			if (node.value.equals(target)) {
+				return true;
+			}
+			if (node.left != null) {
+				stack.push(node.left);
+			}
+			if (node.right != null) {
+				stack.push(node.right);
+			}
+		}
 		return false;
 	}
 
@@ -117,8 +145,17 @@ public class MyTreeMap<K, V> implements Map<K, V> {
 	@Override
 	public Set<K> keySet() {
 		Set<K> set = new LinkedHashSet<K>();
-        // TODO: Fill this in.
+        insertInOrder(root, set);
 		return set;
+	}
+
+	private void insertInOrder(Node node, Set<K> set) {
+		if (node == null) {
+			return;
+		}
+		insertInOrder(node.left, set);
+		set.add(node.key);
+		insertInOrder(node.right, set);
 	}
 
 	@Override
@@ -135,8 +172,29 @@ public class MyTreeMap<K, V> implements Map<K, V> {
 	}
 
 	private V putHelper(Node node, K key, V value) {
-        // TODO: Fill this in.
-        return null;
+		int comp = ((Comparable<? super K>) key).compareTo(node.key);
+        if (comp == 0) {
+			V prevVal = node.value;
+			node.value = value;
+			return prevVal;
+		} else if (comp > 0) {
+			if (node.right != null) {
+				return putHelper(node.right, key, value);
+			} else {
+				node.right = new Node(key, value);
+				size++;
+				return null;
+			}
+		} else {
+			if (node.left != null) {
+				return putHelper(node.left, key, value);
+			} else {
+				node.left = new Node(key, value);
+				size++;
+				return null;
+			}
+
+		}
 	}
 
 	@Override
